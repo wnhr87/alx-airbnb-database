@@ -1,57 +1,81 @@
- -- INNER JOIN: Bookings and Users
---This returns only the bookings that are linked to a user.
-SELECT 
-    bookings.booking_id,
-    bookings.date,
-    users.user_id,
-    users.name
-FROM 
-    bookings
-INNER JOIN 
-    users ON bookings.user_id = users.user_id;
-
-
---LEFT JOIN: Properties and Reviews
---This retrieves all properties, including those without any reviews.
---SELECT 
-  --  properties.property_id,
-  --  properties.name,
-   -- reviews.review_id,
-   -- reviews.rating
---FROM 
-   -- properties
---LEFT JOIN 
-  --  reviews ON properties.property_id = reviews.property_id;
+# ✅ 1. INNER JOIN – Get all bookings and the users who made them
 SELECT
-  p.id          AS property_id,
-  p.name        AS property_name,
-  p.location,
-  r.id          AS review_id,
-  r.user_id     AS reviewer_id,
-  r.rating,
-  r.comment
+    bookings.id AS booking_id,
+    bookings.property_id,
+    bookings.booking_date,
+    users.id AS user_id,
+    users.name AS user_name,
+    users.email
 FROM
-  properties AS p
+    bookings
+INNER JOIN
+    users ON bookings.user_id = users.id;
+***🧠 Explanation: This returns only bookings that are linked to a valid user (i.e.,
+ users who made a booking). If a booking is not linked to a user, it won't appear.
+***
+
+# ✅ 2. LEFT JOIN – Get all properties and their reviews, including those without reviews
+
+SELECT
+    properties.id AS property_id,
+    properties.name AS property_name,
+    reviews.id AS review_id,
+    reviews.rating,
+    reviews.comment
+FROM
+    properties
 LEFT JOIN
-  reviews AS r
-ON
-  p.id = r.property_id;
+    reviews ON properties.id = reviews.property_id;
 
+'
+🧠 Explanation: This will return all properties, even if they don't have a review. If a property has no review, the review_id, rating, and comment columns will be NULL.
+'
 
+# ✅ 3. FULL OUTER JOIN – Get all users and all bookings (even unlinked)
 
---FULL OUTER JOIN: Users and Bookings
---Shows all users and all bookings—even if there’s no match between them.
-SELECT 
-    users.user_id,
-    users.name,
-    bookings.booking_id,
-    bookings.date
-FROM 
+SELECT
+    users.id AS user_id,
+    users.name AS user_name,
+    bookings.id AS booking_id,
+    bookings.property_id,
+    bookings.booking_date
+FROM
     users
-FULL OUTER JOIN 
-    bookings ON users.user_id = bookings.user_id;
+FULL OUTER JOIN
+    bookings ON users.id = bookings.user_id;
 
+'
+🧠 Explanation: This shows:
 
+All users (even those who haven't booked anything).
 
+All bookings (even those not linked to any user).
 
+NULL values will appear in the unmatched side.
 
+⚠️ Note: Some databases like MySQL don't support FULL OUTER JOIN directly. You can simulate it with UNION:
+'
+
+#
+# ✅ Corrected SQL Query (with ORDER BY)
+sql
+Copy
+Edit
+SELECT
+    properties.id AS property_id,
+    properties.name AS property_name,
+    reviews.id AS review_id,
+    reviews.rating,
+    reviews.comment
+FROM
+    properties
+LEFT JOIN
+    reviews ON properties.id = reviews.property_id
+ORDER BY
+    properties.id;
+🧠 Why ORDER BY properties.id?
+Ordering by properties.id helps:
+
+Keep results grouped by property.
+
+Make it easy to see which properties have NULL reviews (i.e., no reviews).
